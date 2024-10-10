@@ -15,3 +15,5 @@ Route::apiResource("/blog", BlogController::class, [
 ]);
 
 // Route::get("/blog")
+
+//teste
