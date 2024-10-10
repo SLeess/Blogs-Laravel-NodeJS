@@ -13,7 +13,3 @@ Route::apiResource("/blog", BlogController::class, [
     "parameters" => ["blog" => "data"],
     // "except" => ["index"]
 ]);
-
-// Route::get("/blog")
-
-//teste
