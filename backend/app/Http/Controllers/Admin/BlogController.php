@@ -21,17 +21,17 @@ class BlogController extends Controller
     {
         $perPage = $request->query('perPage') ?? null;
 
-        if(!is_numeric($perPage))
+        if(!is_numeric($perPage)&& ($perPage != null))
             return response()->json([
                 'status' => false,
                 'message' => "Erro quanto ao filtro de pagina inserido",
                 "error" => "perPage is not int, it's String!",
             ], Response::HTTP_BAD_REQUEST);
 
-        $perPage = (int) $perPage;
+        // $perPage = (int) $perPage;
 
         $blogs = ($perPage != null) ?
-                DB::table('blogs')->simplePaginate($perPage) :
+                DB::table('blogs')->simplePaginate((int) $perPage) :
                 DB::table('blogs')->simplePaginate(Blog::count());
 
         return response()->json([

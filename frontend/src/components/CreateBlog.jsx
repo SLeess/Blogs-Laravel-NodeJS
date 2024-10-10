@@ -1,11 +1,46 @@
 import React, { useState } from 'react'
 import Editor from 'react-simple-wysiwyg';
+import { useForm } from "react-hook-form";
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CreateBlog = () => {
   const [html, setHtml] = useState('');
+
+  const navigate = useNavigate();
+  
+//   const notify = () => toast("Wow so easy!");
+
   function onChange(e) {
     setHtml(e.target.value);
   }
+  const { 
+        register, 
+        handleSubmit, 
+        watch, 
+        formState: { errors } 
+    } = useForm();
+
+//   const onSubmit = data => console.log(data);
+  const formSubmit = async (data) => {
+    const newData = {...data, "description": html};
+    // console.log(newData);
+    const res = await fetch("http://localhost:8000/api/blog/", {
+        method: "POST",
+        headers: {
+            'Content-type' : "application/json",
+            'Accept' : "application/json",
+        },
+        body: JSON.stringify(newData),
+    });
+    toast("Blog adicionado com sucesso!");
+    navigate('/');
+    console.log(res);
+  }
+
+//   console.log(watch("example"));
+
   return (
     <div className="container mb-5">
         <div className="d-flex justify-content-between pt-5 mb-4">
@@ -15,30 +50,44 @@ const CreateBlog = () => {
         <div className="row">
             <div className="card border-1 shadow-sm">
                 <div className="card-body">
-                    <div className="mb-3">
-                        <label htmlFor="" className="form-label">Título</label>
-                        <input type="text" name="title" id="title" className='form-control' placeholder='Título do Blog'/>
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="" className="form-label">Descrição</label>
-                        <Editor name='description' value={html} onChange={onChange} containerProps={{ style: { height: '400px' } }}/>
-                        {/* <textarea name="description" id="description" cols="30" rows="10" className='form-control' placeholder='Descrição completa do Blog'></textarea> */}
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="" className="label-control">Imagem</label>
-                        <input type="file" className='form-control' name='image'/>
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="" className="label-control">Autor</label>
-                        <input type="text" name="author" id="author"  className='form-control' placeholder='Nome do Autor'/>
-                    </div>
-                    <div className="mb-3">
-                        <a href="#" className="btn btn-dark">Criar Blog</a>
-                    </div>
+                    <form onSubmit={handleSubmit(formSubmit)} action="#" method='' className="form-control">
+                        <div className="mb-3">
+                            <label className="form-label">Título</label>
+                            <input { ...register('title', { required: true }) } type="text" name="title" id="title" className={`form-control ${errors.title ? "is-invalid" : ""}`} placeholder='Título do Blog'/>
+                            {errors.title && <p className='invalid-feedback'>Esse campo é obrigatório!</p>}
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Descrição Curta</label>
+                            <textarea { ...register('shortDescription') } className="form-control" cols="30" rows="5" name="shortDescription" id="shortDescription" placeholder='Descrição curta do Blog'></textarea>
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Descrição</label>
+                            <Editor  name='description' value={html} onChange={onChange} containerProps={{ style: { height: '400px' } }}/>
+                            {/* <textarea name="description" id="description" cols="30" rows="10" className='form-control' placeholder='Descrição completa do Blog'></textarea> */}
+                        </div>
+                        <div className="mb-3">
+                            <label className="label-control">Imagem</label>
+                            <input type="file" className='form-control' name='image'/>
+                        </div>
+                        <div className="mb-3">
+                            <label className="label-control">Autor</label>
+                            <input 
+                                { ...register('author', { required: true }) } 
+                                type="text" 
+                                name="author" 
+                                id="author"  
+                                className={`form-control ${errors.author ? "is-invalid" : ""}`} 
+                                placeholder='Nome do Autor'/>
+                            {errors.author && <p className='invalid-feedback'>O campo de autor é obrigatório!</p>}
+                        </div>
+                        <button type="submit" className="btn btn-dark">Criar Blog</button>
+                        {/* <button onClick={notify}>Notify!</button> */}
+                    </form>
                 </div>
 
             </div>
         </div>
+        
     </div>
   )
 }
