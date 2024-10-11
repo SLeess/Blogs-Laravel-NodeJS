@@ -69,9 +69,9 @@ class BlogController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if($request->image == null || $request->image == ''){
-            $request->merge(['image' => 'https://placehold.co/600x400.png']);
-        }
+        // if($request->image == null || $request->image == ''){
+        //     $request->merge(['image' => 'https://placehold.co/600x400.png']);
+        // }
 
         $data = $request->only(['title', 'description', 'shortDescription', 'image', 'author']);
         $blog = Blog::create($data);

@@ -7,7 +7,8 @@ function Blogs() {
   const fetchBlogs = async () => {
     const res = await fetch('http://localhost:8000/api/blog');
     const result = await res.json();
-    setBlogs(result);
+    // console.log(result.data[0].data);
+    setBlogs(result.data[0].data);
   }
   
   useEffect(() => {
