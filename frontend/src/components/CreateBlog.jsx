@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const CreateBlog = () => {
   const [html, setHtml] = useState('');
+  const [image, setImage] = useState('');
 
   const navigate = useNavigate();
   
@@ -15,6 +16,36 @@ const CreateBlog = () => {
   function onChange(e) {
     setHtml(e.target.value);
   }
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+
+    formData.append("image", file);
+
+    const res = await fetch("http://localhost:8000/api/save-temp-image", {
+        method : "POST",
+        body : formData
+    });
+
+    const result = await res.json();
+
+    // console.log(result);
+    if(result.status == false){
+        
+        const errors = result.errors || []; 
+        errors.forEach(error => {
+            if (error.image) {
+                error.image.forEach(errMsg => {
+                    alert(errMsg);
+                });
+            }
+        });
+        e.target.value = null;
+    }
+    setImage(result.data.image)
+  }
+
   const { 
         register, 
         handleSubmit, 
@@ -23,8 +54,8 @@ const CreateBlog = () => {
     } = useForm();
 
 //   const onSubmit = data => console.log(data);
-  const formSubmit = async (data) => {
-    const newData = {...data, "description": html};
+  const formSubmit = async (data) => { //
+    const newData = {...data, "description": "'"+ html + "'", "image": image};
     // console.log(newData);
     const res = await fetch("http://localhost:8000/api/blog/", {
         method: "POST",
@@ -36,7 +67,7 @@ const CreateBlog = () => {
     });
     toast("Blog adicionado com sucesso!");
     navigate('/');
-    console.log(res);
+    // console.log(res);
   }
 
 //   console.log(watch("example"));
@@ -67,7 +98,7 @@ const CreateBlog = () => {
                         </div>
                         <div className="mb-3">
                             <label className="label-control">Imagem</label>
-                            <input type="file" className='form-control' name='image'/>
+                            <input type="file" onChange={handleFileChange} className='form-control' name='image'/>
                         </div>
                         <div className="mb-3">
                             <label className="label-control">Autor</label>

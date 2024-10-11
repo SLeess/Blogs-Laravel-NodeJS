@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Symfony\Component\HttpFoundation\Test\Constraint\ResponseIsRedirected;
+use Symfony\Component\HttpFoundation\Response;
 
 class BlogController extends Controller
 {
@@ -30,9 +28,9 @@ class BlogController extends Controller
 
         // $perPage = (int) $perPage;
 
-        $blogs = ($perPage != null) ?
-                DB::table('blogs')->simplePaginate((int) $perPage) :
-                DB::table('blogs')->simplePaginate(Blog::count());
+        $perPage = ($perPage != null)? (int) $perPage : Blog::count();
+
+        $blogs = DB::table('blogs')->orderBy('created_at', 'DESC')->simplePaginate($perPage);
 
         return response()->json([
             "status" => true,
@@ -47,6 +45,7 @@ class BlogController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         $validacao = Validator::make($request->all(),
             [
                 'title' => [
@@ -70,13 +69,17 @@ class BlogController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        if($request->image == null || $request->image == ''){
+            $request->merge(['image' => 'https://placehold.co/600x400.png']);
+        }
+
         $data = $request->only(['title', 'description', 'shortDescription', 'image', 'author']);
         $blog = Blog::create($data);
 
         return response()->json([
             "status" => true,
             "message" => "Blog cadastrado com sucesso: '$request->title'!",
-            "data" => $blog
+            "data" => [$blog]
         ], Response::HTTP_OK);
     }
 
@@ -129,6 +132,11 @@ class BlogController extends Controller
             ],
         Response::HTTP_BAD_REQUEST);
         // Blog::update();
+
+        if($request->image == null || $request->image == ''){
+            $request->merge(['image' => 'https://placehold.co/600x400.png']);
+        }
+
         $blog->update($request->only(["author", "description", "shorDescription", "image", "title"]));
 
         return response()->json([
